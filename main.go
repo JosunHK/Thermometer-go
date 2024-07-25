@@ -46,12 +46,13 @@ var relations = []r{
 	{Points{3, 3}, Points{3, 2}},
 }
 
+var m [][]*Node
 var targetX = []int{2, 2, 2, 1}
 var targetY = []int{2, 2, 1, 2}
 
 func main() {
 	const N int = 4
-	m := make([][]*Node, N)
+	m = make([][]*Node, N)
 	for i := range m {
 		m[i] = make([]*Node, N)
 	}
@@ -68,39 +69,74 @@ func main() {
 		m[r.to.y][r.to.x] = next
 	}
 
-	play(m, N)
+	// play(N)
 
 	printMap(m)
 }
 
-func play(m [][]*Node, N int) {
+func play(N int) error {
 	nodeStack := stack.New()
 	currentX := make([]int, N)
 	currentY := make([]int, N)
 
-	for _, head := range heads {
-		//start with the max possible head
-		x, y := head.x, head.y
+	fmt.Println(exhaustNode(m[2][1], currentX, currentY))
+
+	for i, h1 := range heads {
+		curr := m[h1.y][h1.x]
+		ptr := 0
 		for {
-			nodeStack.Push(m[y][x])
-			currentX[head.x]++
-			currentY[head.x]++
-			boom := isBoom(currentX[head.x], currentY[head.y], head.x, head.y)
-			if boom {
-
-			}
-
-		}
-
-		for {
-			currentX[head.x]++
-			currentY[head.x]++
-
-			boom := isBoom(currentX[head.x], currentY[head.y], head.x, head.y)
-			if boom {
+			//back track
+			if curr == nil {
 				nodeStack.Pop()
+				//func decrement curr node(curr, currentX, currentY)
+				curr = nodeStack.Peek().(*Node).prev
+				ptr--
+				if ptr == i {
+					ptr--
+				}
+			}
+
+			//end reached, start back track
+			if ptr == N {
+				curr = curr.prev
+			}
+
+			eNode := exhaustNode(curr, currentX, currentY)
+			nodeStack.Push(eNode)
+
+			if i == ptr {
+				ptr++
+			}
+
+			//get next head
+			nextHead := heads[ptr]
+			curr = m[nextHead.y][nextHead.x]
+			ptr++
+
+			//check end game
+			if isGG(currentX, currentY) {
+				return nil
 			}
 		}
+	}
+
+	return fmt.Errorf("no solution")
+}
+
+func exhaustNode(node *Node, currentX, currentY []int) *Node {
+	boom := isBoom(currentX[node.x]+1, currentY[node.y]+1, node.x, node.y)
+	if boom {
+		return node.prev
+	} else {
+		node.active = true
+		m[node.y][node.x] = node
+		currentX[node.x]++
+		currentY[node.y]++
+		if node.next == nil {
+			return node
+		}
+
+		return exhaustNode(node.next, currentX, currentY)
 	}
 }
 
@@ -123,9 +159,25 @@ func isBoom(valX, valY, indexX, indexY int) bool {
 }
 
 func printMap(m [][]*Node) {
-	for _, row := range m {
+	//println color
+	// red := "\033[31m"
+	// Reset = "\033[0m"
+	fmt.Printf("     ")
+	for _, val := range targetX {
+		fmt.Printf(" %v  ", val)
+	}
+
+	fmt.Println()
+	fmt.Print("┉┉┉┉")
+
+	for range targetX {
+		fmt.Print("┉┉┉┉")
+	}
+	fmt.Println("┉")
+
+	for i, row := range m {
+		fmt.Printf("  %v ┋", targetY[i])
 		for _, node := range row {
-			fmt.Print("┋")
 			if node != nil {
 				if node.prev != nil {
 					if node.prev.y == node.y {
@@ -142,12 +194,9 @@ func printMap(m [][]*Node) {
 		}
 		fmt.Println()
 		for range row {
-			fmt.Print("┉")
-			fmt.Print("┉")
-			fmt.Print("┉")
-			fmt.Print("┉")
-			fmt.Print("┉")
+			fmt.Print("┉┉┉┉")
 		}
-		fmt.Println()
+		fmt.Print("┉┉┉┉")
+		fmt.Println("┉")
 	}
 }
