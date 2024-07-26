@@ -93,7 +93,7 @@ func play() error {
 		ptr := 0
 		for {
 			count++
-			// printMap()
+			// realTimePrintMap()
 			if curr != nil {
 				eNode := exhaustNode(curr)
 				if eNode != nil {
@@ -200,6 +200,14 @@ func isBoom(indexX, indexY int) bool {
 	return false
 }
 
+func realTimePrintMap() {
+	printMap()
+
+	for i := 0; i < len(targetX)*2+2; i++ {
+		fmt.Printf("\033[1A\033[K")
+	}
+}
+
 func printMap() {
 	//println color
 	red := "\033[31m"
@@ -249,10 +257,6 @@ func printMap() {
 		fmt.Print("┉┉┉┉")
 		fmt.Println("┉")
 	}
-
-	// for i := 0; i < len(targetX)*2+2; i++ {
-	// 	fmt.Printf("\033[1A\033[K")
-	// }
 }
 
 func initData() {
