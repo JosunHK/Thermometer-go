@@ -4,6 +4,24 @@ This is a program that tries to find the solution to the Thermometers game deter
 
 for rules and testing check : https://www.puzzle-thermometers.com/
 
+# THIS IS NOT A COMPLETED PROJECT
+
+### It can reliablly do
+
+4x4 normal
+4x4 curved
+6x6 normal
+6x6 curved
+
+### Sometimes do
+
+10x10 normal
+10x10 curved
+
+### 15x15 and more
+
+basically can't or not in reasonable time
+
 # JS script
 
 To import custom data, open dev console in the thermometer game,
