@@ -26,7 +26,7 @@ type r struct {
 	to   Points
 }
 
-const raw = "start 0 4,straight 0 3,straight 0 2,straight 0 1,curve 0 0,curve 1 0,end 1 1,start 0 5,straight 1 5,straight 2 5,straight 3 5,straight 4 5,curve 5 5,end 5 4,start 1 2,straight 1 3,curve 1 4,straight 2 4,straight 3 4,end 4 4,start 2 0,curve 3 0,straight 3 1,end 3 2,start 2 1,straight 2 2,curve 2 3,end 3 3,start 4 0,curve 5 0,curve 5 1,end 4 1,start 4 2,curve 5 2,curve 5 3,end 4 3;3,1,3,2,4,4;3,4,3,2,2,3;"
+const raw = "start 2 0,straight 1 0,end 0 0,start 0 1,straight 0 2,straight 0 3,straight 0 4,straight 0 5,straight 0 6,straight 0 7,straight 0 8,end 0 9,start 4 1,straight 3 1,straight 2 1,end 1 1,start 2 2,end 1 2,start 1 3,straight 1 4,straight 1 5,straight 1 6,end 1 7,start 1 9,end 1 8,start 2 3,straight 2 4,end 2 5,start 2 6,end 2 7,start 2 8,end 3 8,start 2 9,straight 3 9,straight 4 9,straight 5 9,straight 6 9,straight 7 9,straight 8 9,end 9 9,start 3 0,straight 4 0,straight 5 0,end 6 0,start 4 2,end 3 2,start 3 3,straight 3 4,straight 3 5,straight 3 6,end 3 7,start 9 3,straight 8 3,straight 7 3,straight 6 3,straight 5 3,end 4 3,start 6 4,straight 5 4,end 4 4,start 4 5,straight 4 6,straight 4 7,end 4 8,start 5 2,end 5 1,start 6 5,end 5 5,start 8 6,straight 7 6,straight 6 6,end 5 6,start 5 7,straight 6 7,straight 7 7,end 8 7,start 5 8,straight 6 8,end 7 8,start 7 1,end 6 1,start 7 2,end 6 2,start 8 0,end 7 0,start 7 4,end 8 4,start 7 5,end 8 5,start 8 2,end 8 1,start 9 8,end 8 8,start 9 2,straight 9 1,end 9 0,start 9 4,straight 9 5,straight 9 6,end 9 7;9,5,5,5,5,4,3,6,6,1;1,9,6,5,3,4,7,3,3,8;"
 
 var heads []Points
 
@@ -155,6 +155,7 @@ func play() error {
 					}
 
 					head = nodeStack.Pop().(*Node)
+					disableNode(head)
 
 					if nodeStack.Len() == 0 {
 						break
