@@ -26,7 +26,14 @@ type r struct {
 	to   Points
 }
 
-const raw = "start 2 0,straight 1 0,end 0 0,start 0 1,straight 0 2,straight 0 3,straight 0 4,straight 0 5,straight 0 6,straight 0 7,straight 0 8,end 0 9,start 4 1,straight 3 1,straight 2 1,end 1 1,start 2 2,end 1 2,start 1 3,straight 1 4,straight 1 5,straight 1 6,end 1 7,start 1 9,end 1 8,start 2 3,straight 2 4,end 2 5,start 2 6,end 2 7,start 2 8,end 3 8,start 2 9,straight 3 9,straight 4 9,straight 5 9,straight 6 9,straight 7 9,straight 8 9,end 9 9,start 3 0,straight 4 0,straight 5 0,end 6 0,start 4 2,end 3 2,start 3 3,straight 3 4,straight 3 5,straight 3 6,end 3 7,start 9 3,straight 8 3,straight 7 3,straight 6 3,straight 5 3,end 4 3,start 6 4,straight 5 4,end 4 4,start 4 5,straight 4 6,straight 4 7,end 4 8,start 5 2,end 5 1,start 6 5,end 5 5,start 8 6,straight 7 6,straight 6 6,end 5 6,start 5 7,straight 6 7,straight 7 7,end 8 7,start 5 8,straight 6 8,end 7 8,start 7 1,end 6 1,start 7 2,end 6 2,start 8 0,end 7 0,start 7 4,end 8 4,start 7 5,end 8 5,start 8 2,end 8 1,start 9 8,end 8 8,start 9 2,straight 9 1,end 9 0,start 9 4,straight 9 5,straight 9 6,end 9 7;9,5,5,5,5,4,3,6,6,1;1,9,6,5,3,4,7,3,3,8;"
+//10x10
+// var raw = "s-0-0,~-1-0,~-2-0,s-0-1,~-0-2,~-0-3,~-0-4,~-0-5,~-0-6,~-0-7,~-0-8,~-0-9,s-2-1,~-1-1,s-1-2,~-1-3,s-4-4,~-3-4,~-2-4,~-1-4,s-1-5,~-2-5,~-3-5,~-4-5,~-5-5,~-6-5,~-7-5,s-1-7,~-1-6,s-8-8,~-7-8,~-6-8,~-5-8,~-4-8,~-3-8,~-2-8,~-1-8,s-8-9,~-7-9,~-6-9,~-5-9,~-4-9,~-3-9,~-2-9,~-1-9,s-2-2,~-3-2,~-4-2,~-5-2,s-2-3,~-3-3,~-4-3,~-5-3,s-2-6,~-3-6,~-4-6,~-5-6,~-6-6,~-7-6,s-7-7,~-6-7,~-5-7,~-4-7,~-3-7,~-2-7,s-3-1,~-3-0,s-4-0,~-5-0,s-5-1,~-4-1,s-5-4,~-6-4,s-6-3,~-6-2,~-6-1,~-6-0,s-7-0,~-7-1,s-7-4,~-7-3,~-7-2,s-8-0,~-8-1,~-8-2,~-8-3,~-8-4,~-8-5,~-8-6,~-8-7,s-9-0,~-9-1,s-9-2,~-9-3,~-9-4,~-9-5,~-9-6,~-9-7,s-9-8,~-9-9;4,7,6,6,5,4,4,4,8,1;5,8,6,5,5,3,2,3,7,5"
+
+// 6x6
+var raw = "s-0-0,~-1-0,~-2-0,~-3-0,~-3-1,~-3-2,~-3-3,s-1-1,~-0-1,~-0-2,~-1-2,s-0-3,~-0-4,s-2-5,~-2-4,~-1-4,~-1-5,~-0-5,s-1-3,~-2-3,~-2-2,~-2-1,s-3-5,~-3-4,s-4-3,~-4-2,~-4-1,~-4-0,~-5-0,s-4-4,~-4-5,s-5-2,~-5-1,s-5-3,~-5-4,~-5-5;4,4,2,3,2,2;2,5,4,2,3,1"
+
+// 4x4
+// var raw = "s-0-0,~-0-1,s-0-2,~-0-3,s-1-0,~-1-1,~-1-2,~-1-3,s-2-0,~-2-1,s-2-2,~-2-3,s-3-3,~-3-2,~-3-1,~-3-0;2,1,3,1;3,1,1,2"
 
 var heads []Points
 
@@ -74,6 +81,7 @@ func main() {
 }
 
 func play() error {
+	count := 0
 	for i, h := range heads {
 		headsToCheck := []Points{}
 		headsToCheck = append(headsToCheck, heads[:i]...)
@@ -83,109 +91,52 @@ func play() error {
 		curr := m[h.y][h.x]
 		ptr := 0
 		for {
+			count++
 			eNode := exhaustNode(curr)
 			if eNode != nil {
 				nodeStack.Push(eNode)
 			}
 
 			if isGG() {
+				fmt.Println("took ", count, " steps")
 				return nil
 			}
 
-			if ptr >= len(headsToCheck) {
-				disableNode(nodeStack.Peek().(*Node))
-				prev := nodeStack.Peek().(*Node).prev
-				if prev != nil {
-					nodeStack.Pop()
-					nodeStack.Push(prev)
+			if ptr < len(headsToCheck) {
+				//get next head
+				nextHead := headsToCheck[ptr]
+				curr = m[nextHead.y][nextHead.x]
+				ptr++
+				continue
+			}
 
-					head := getHead(prev)
-					ptr = slices.Index(headsToCheck, head.Points) + 1
-					if !(ptr >= len(headsToCheck)) {
-						curr = m[headsToCheck[ptr].y][headsToCheck[ptr].x]
-						continue
-					}
-				}
+			disableNode(nodeStack.Peek().(*Node))
+			prev := nodeStack.Peek().(*Node).prev
+			if prev != nil {
+				nodeStack.Pop()
+				nodeStack.Push(prev)
 
-				head := nodeStack.Pop().(*Node)
-				disableNode(head)
-
-				if nodeStack.Len() == 0 {
-					break
-				}
-
-				if !(ptr >= len(headsToCheck)) {
-					ptr = slices.Index(headsToCheck, head.Points) + 1
-					curr = m[headsToCheck[ptr].y][headsToCheck[ptr].x]
-					continue
-				}
-
-				// disableNode(nodeStack.Peek().(*Node))
-				// prev = nodeStack.Peek().(*Node).prev
-				// if prev != nil {
-				// 	nodeStack.Pop()
-				// 	nodeStack.Push(prev)
-
-				// 	head := getHead(prev)
-				// 	ptr = slices.Index(headsToCheck, head.Points) + 1
-				// 	curr = m[headsToCheck[ptr].y][headsToCheck[ptr].x]
-				// 	continue
-				// }
-
-				// head = nodeStack.Pop().(*Node)
-
-				// if nodeStack.Len() == 0 {
-				// 	break
-				// }
-
-				// ptr = slices.Index(headsToCheck, head.Points) + 1
-				// curr = m[headsToCheck[ptr].y][headsToCheck[ptr].x]
-				// continue
-
-				for ptr >= len(headsToCheck) {
-					disableNode(nodeStack.Peek().(*Node))
-					prev = nodeStack.Peek().(*Node).prev
-					if prev != nil {
-						nodeStack.Pop()
-						nodeStack.Push(prev)
-
-						head := getHead(prev)
-						ptr = slices.Index(headsToCheck, head.Points) + 1
-						continue
-					}
-
-					head = nodeStack.Pop().(*Node)
-					disableNode(head)
-
-					if nodeStack.Len() == 0 {
-						break
-					}
-
-					ptr = slices.Index(headsToCheck, head.Points) + 1
-				}
-				if nodeStack.Len() == 0 {
-					break
-				}
-
+				head := getHead(prev)
+				ptr = slices.Index(headsToCheck, head.Points) + 1
 				curr = m[headsToCheck[ptr].y][headsToCheck[ptr].x]
 				continue
 			}
 
-			//get next head
-			nextHead := headsToCheck[ptr]
-			curr = m[nextHead.y][nextHead.x]
-			ptr++
+			head := nodeStack.Pop().(*Node)
+			disableNode(head)
+			if nodeStack.Len() == 0 {
+				break
+			}
+
+			head = nodeStack.Peek().(*Node)
+			ptr = slices.Index(headsToCheck, head.Points) + 1
+			curr = m[headsToCheck[ptr].y][headsToCheck[ptr].x]
+			continue
 		}
 	}
 
+	fmt.Println("took ", count, " steps")
 	return fmt.Errorf("no solution")
-}
-
-func printStack() {
-	stackCopy := *nodeStack
-	for range stackCopy.Len() {
-		fmt.Println(stackCopy.Pop().(*Node).Points)
-	}
 }
 
 func disableNode(node *Node) {
@@ -208,32 +159,20 @@ func exhaustNode(node *Node) *Node {
 	boom := isBoom(node.x, node.y)
 	if boom {
 		return node.prev
-	} else {
+	} else if !node.active {
 		node.active = true
 		currentX[node.x]++
 		currentY[node.y]++
-		if node.next == nil {
-			return node
-		}
-
-		return exhaustNode(node.next)
 	}
+	if node.next == nil {
+		return node
+	}
+	return exhaustNode(node.next)
 }
 
 func isGG() bool {
-	xScore := make([]int, len(targetX))
-	yScore := make([]int, len(targetY))
-	for _, row := range m {
-		for _, node := range row {
-			if node != nil && node.active {
-				xScore[node.x]++
-				yScore[node.y]++
-			}
-		}
-	}
-
 	for i := range currentX {
-		if xScore[i] != targetX[i] || yScore[i] != targetY[i] {
+		if currentX[i] != targetX[i] || currentY[i] != targetY[i] {
 			return false
 		}
 	}
@@ -306,11 +245,11 @@ func initData() {
 
 	var prev Points
 	for _, rawNode := range rawNodes {
-		nodePts := strings.Split(rawNode, " ")
+		nodePts := strings.Split(rawNode, "-")
 		y, _ := strconv.Atoi(nodePts[1])
 		x, _ := strconv.Atoi(nodePts[2])
 
-		if nodePts[0] == "start" {
+		if nodePts[0] == "s" {
 			heads = append(heads, Points{y: y, x: x})
 		} else {
 			relations = append(relations, r{this: prev, to: Points{y: y, x: x}})
