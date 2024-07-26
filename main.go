@@ -30,7 +30,7 @@ type r struct {
 // var raw = "s-0-0,~-1-0,~-2-0,s-0-1,~-0-2,~-0-3,~-0-4,~-0-5,~-0-6,~-0-7,~-0-8,~-0-9,s-2-1,~-1-1,s-1-2,~-1-3,s-4-4,~-3-4,~-2-4,~-1-4,s-1-5,~-2-5,~-3-5,~-4-5,~-5-5,~-6-5,~-7-5,s-1-7,~-1-6,s-8-8,~-7-8,~-6-8,~-5-8,~-4-8,~-3-8,~-2-8,~-1-8,s-8-9,~-7-9,~-6-9,~-5-9,~-4-9,~-3-9,~-2-9,~-1-9,s-2-2,~-3-2,~-4-2,~-5-2,s-2-3,~-3-3,~-4-3,~-5-3,s-2-6,~-3-6,~-4-6,~-5-6,~-6-6,~-7-6,s-7-7,~-6-7,~-5-7,~-4-7,~-3-7,~-2-7,s-3-1,~-3-0,s-4-0,~-5-0,s-5-1,~-4-1,s-5-4,~-6-4,s-6-3,~-6-2,~-6-1,~-6-0,s-7-0,~-7-1,s-7-4,~-7-3,~-7-2,s-8-0,~-8-1,~-8-2,~-8-3,~-8-4,~-8-5,~-8-6,~-8-7,s-9-0,~-9-1,s-9-2,~-9-3,~-9-4,~-9-5,~-9-6,~-9-7,s-9-8,~-9-9;4,7,6,6,5,4,4,4,8,1;5,8,6,5,5,3,2,3,7,5"
 
 // 6x6
-var raw = "s-0-0,~-1-0,~-2-0,~-3-0,~-3-1,~-3-2,~-3-3,s-1-1,~-0-1,~-0-2,~-1-2,s-0-3,~-0-4,s-2-5,~-2-4,~-1-4,~-1-5,~-0-5,s-1-3,~-2-3,~-2-2,~-2-1,s-3-5,~-3-4,s-4-3,~-4-2,~-4-1,~-4-0,~-5-0,s-4-4,~-4-5,s-5-2,~-5-1,s-5-3,~-5-4,~-5-5;4,4,2,3,2,2;2,5,4,2,3,1"
+var raw = "s-0-3,~-0-2,~-0-1,~-0-0,~-1-0,~-1-1,s-0-4,~-1-4,~-1-5,~-0-5,s-1-2,~-2-2,s-1-3,~-2-3,~-2-4,~-2-5,s-2-1,~-2-0,~-3-0,~-3-1,s-5-1,~-5-0,~-4-0,~-4-1,~-4-2,~-3-2,~-3-3,s-4-3,~-4-4,~-4-5,~-3-5,~-3-4,s-5-2,~-5-3,~-5-4,~-5-5;3,4,3,4,2,1;5,3,2,1,4,2"
 
 // 4x4
 // var raw = "s-0-0,~-0-1,s-0-2,~-0-3,s-1-0,~-1-1,~-1-2,~-1-3,s-2-0,~-2-1,s-2-2,~-2-3,s-3-3,~-3-2,~-3-1,~-3-0;2,1,3,1;3,1,1,2"
@@ -52,6 +52,7 @@ var targetY []int
 func main() {
 	initData()
 	m = make([][]*Node, N)
+
 	for i := range m {
 		m[i] = make([]*Node, N)
 	}
@@ -92,31 +93,34 @@ func play() error {
 		ptr := 0
 		for {
 			count++
-			eNode := exhaustNode(curr)
-			if eNode != nil {
-				nodeStack.Push(eNode)
-			}
+			// printMap()
+			if curr != nil {
+				eNode := exhaustNode(curr)
+				if eNode != nil {
+					nodeStack.Push(eNode)
+				}
 
-			if isGG() {
-				fmt.Println("took ", count, " steps")
-				return nil
-			}
+				if isGG() {
+					fmt.Println("took ", count, " steps")
+					return nil
+				}
 
-			if ptr < len(headsToCheck) {
-				//get next head
-				nextHead := headsToCheck[ptr]
-				curr = m[nextHead.y][nextHead.x]
-				ptr++
-				continue
+				if ptr < len(headsToCheck) {
+					nextHead := headsToCheck[ptr]
+					curr = m[nextHead.y][nextHead.x]
+					ptr++
+					continue
+				}
 			}
 
 			disableNode(nodeStack.Peek().(*Node))
 			prev := nodeStack.Peek().(*Node).prev
-			if prev != nil {
+
+			if prev != nil && slices.Index(headsToCheck, getHead(prev).Points) != len(headsToCheck)-1 {
+				head := getHead(prev)
 				nodeStack.Pop()
 				nodeStack.Push(prev)
 
-				head := getHead(prev)
 				ptr = slices.Index(headsToCheck, head.Points) + 1
 				curr = m[headsToCheck[ptr].y][headsToCheck[ptr].x]
 				continue
@@ -124,19 +128,27 @@ func play() error {
 
 			head := nodeStack.Pop().(*Node)
 			disableNode(head)
+
 			if nodeStack.Len() == 0 {
 				break
 			}
-
-			head = nodeStack.Peek().(*Node)
-			ptr = slices.Index(headsToCheck, head.Points) + 1
-			curr = m[headsToCheck[ptr].y][headsToCheck[ptr].x]
-			continue
+			curr = nil
 		}
 	}
 
 	fmt.Println("took ", count, " steps")
 	return fmt.Errorf("no solution")
+}
+
+func printStack() {
+	stackCopy := *nodeStack
+	for range stackCopy.Len() {
+		fmt.Println(stackCopy.Pop().(*Node).Points)
+	}
+
+	for i := 0; i < stackCopy.Len(); i++ {
+		fmt.Printf("\033[1A\033[K")
+	}
 }
 
 func disableNode(node *Node) {
@@ -237,6 +249,10 @@ func printMap() {
 		fmt.Print("┉┉┉┉")
 		fmt.Println("┉")
 	}
+
+	// for i := 0; i < len(targetX)*2+2; i++ {
+	// 	fmt.Printf("\033[1A\033[K")
+	// }
 }
 
 func initData() {
