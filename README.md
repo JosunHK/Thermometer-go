@@ -4,7 +4,7 @@ This is a program that tries to find the solution to the Thermometers game deter
 
 for rules and testing check : https://www.puzzle-thermometers.com/
 
-# THIS IS NOT A COMPLETED PROJECT
+# Results
 
 ### It can reliablly do
 
